@@ -1,18 +1,23 @@
-TOOL_REGISTRY_DATABASE__HOST=localhost
-TOOL_REGISTRY_DATABASE__PORT=5432
-TOOL_REGISTRY_DATABASE__NAME=toolsdb
-TOOL_REGISTRY_DATABASE__USER=toolsadmin
-TOOL_REGISTRY_DATABASE__PASSWORD=yoursecretsecret
+CONFIG_FILE ?= config/config.toml
+
+read_db_config = $(strip $(shell python3 -c 'import tomllib; from pathlib import Path; print(tomllib.loads(Path("$(CONFIG_FILE)").read_text())["database"]["$(1)"])'))
+
+TOOL_REGISTRY_DATABASE__HOST ?= $(call read_db_config,host)
+TOOL_REGISTRY_DATABASE__PORT ?= $(call read_db_config,port)
+TOOL_REGISTRY_DATABASE__NAME ?= $(call read_db_config,name)
+TOOL_REGISTRY_DATABASE__USER ?= $(call read_db_config,user)
+TOOL_REGISTRY_DATABASE__PASSWORD ?= $(call read_db_config,password)
 TOOL_REGISTRY_GITHUB__API_KEY=your_github_api_key
 POSTGRES_CONTAINER=tool-registry-postgres
 POSTGRES_VOLUME=tool_registry_pgdata
 TOOLS_CONTAINER=ghcr.io/eosc-data-commons/tool-registry:latest
+BIOBB_FLOW=src/toolmeta_harvester/flows/harvest_biobb_workflowhub_jupyter.py
 TIMESTAMP := $(shell date +"%Y-%m-%d")
 
 check-secrets:
 	@test -f config/.secrets.toml || (echo "WARNING Missing config/.secrets.toml; github token might not be defined"; exit 0)
 
-.PHONY: run-local run
+.PHONY: run-local run biobb-run biobb-run-local
 run:run-local
 
 run-local: 
@@ -21,6 +26,13 @@ run-local:
 	ls -la src/toolmeta_harvester/flows/*.py
 	@echo "-----"
 	@echo "uv run src/toolmeta_harvester/flows/flow_name.py"
+
+biobb-run:
+	uv run $(BIOBB_FLOW)
+
+biobb-run-local: print-config
+	@echo "-----"
+	uv run $(BIOBB_FLOW)
 
 .PHONY: re-install install
 re-install: clean sync
@@ -36,6 +48,17 @@ clean:
 sync:
 	uv sync
 	uv pip install -e .
+
+.PHONY: print-config
+print-config:
+	@echo "Resolved configuration:"
+	@echo "  CONFIG_FILE=$(CONFIG_FILE)"
+	@echo "  TOOL_REGISTRY_DATABASE__HOST=$(TOOL_REGISTRY_DATABASE__HOST)"
+	@echo "  TOOL_REGISTRY_DATABASE__PORT=$(TOOL_REGISTRY_DATABASE__PORT)"
+	@echo "  TOOL_REGISTRY_DATABASE__NAME=$(TOOL_REGISTRY_DATABASE__NAME)"
+	@echo "  TOOL_REGISTRY_DATABASE__USER=$(TOOL_REGISTRY_DATABASE__USER)"
+	@echo "  TOOL_REGISTRY_DATABASE__PASSWORD=$(TOOL_REGISTRY_DATABASE__PASSWORD)"
+	@echo "  TOOL_REGISTRY_GITHUB__API_KEY=$(TOOL_REGISTRY_GITHUB__API_KEY)"
 
 postgres-dump:
 	@echo "Dumping 'tool_generic' table from Postgres container '$(POSTGRES_CONTAINER)' to 'tool_generic.sql'..."

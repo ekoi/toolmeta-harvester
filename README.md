@@ -39,6 +39,8 @@
 
 Setup `config/.secrets.toml` with Github API token
 
+Database defaults are defined in `config/config.toml`. The `Makefile` reads its default Postgres host, port, database name, user, and password from that file, and environment variables can still override them at runtime.
+
 ## Setup
 
 ```
@@ -52,3 +54,30 @@ make run
 ```
 
 Runs a default pipeline that harvests data from WorkflowHub, stores it in the db.
+
+Inspect the resolved Make configuration, including database defaults and any environment overrides:
+
+```bash
+make print-config
+```
+
+### BIOBB Jupyter workflows
+
+Harvest the curated BIOBB WorkflowHub workflow list:
+
+```bash
+make biobb-run
+```
+
+Preview the resolved configuration first, then start the BIOBB harvester:
+
+```bash
+make biobb-run-local
+```
+
+Equivalent direct command:
+
+```bash
+uv run src/toolmeta_harvester/flows/harvest_biobb_workflowhub_jupyter.py
+```
+

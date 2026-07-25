@@ -2,7 +2,6 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 from dynaconf import Dynaconf
-import json
 
 # Default BASE_DIR for Dynaconf interpolation in config/config.toml.
 # BASE_DIR is set to the project root (parent of the config/ directory) when not provided.
@@ -16,8 +15,8 @@ settings = Dynaconf(
 # Environment variable overrides:
 # export TOOL_REGISTRY_DATABASE__HOST=localhost
 # export TOOL_REGISTRY_DATABASE__PORT=5432
-# export TOOL_REGISTRY_DATABASE__NAME=admin
-# export TOOL_REGISTRY_DATABASE__USER=harvester
+# export TOOL_REGISTRY_DATABASE__NAME=toolsdb
+# export TOOL_REGISTRY_DATABASE__USER=toolsadmin
 # export TOOL_REGISTRY_DATABASE__PASSWORD=yoursecretsecret
 # export TOOL_REGISTRY_GITHUB__API_KEY=your_github_api_key
 
@@ -42,7 +41,7 @@ class GalaxyConfig:
     host_url: str
 
 
-def load_galaxy_config() -> GitConfig:
+def load_galaxy_config() -> GalaxyConfig:
     galaxy = settings.galaxy_local
     return GalaxyConfig(api_key=galaxy["api_key"], host_url=galaxy["host_url"])
 

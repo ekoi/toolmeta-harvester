@@ -1,8 +1,8 @@
 [database]
 host = "localhost"
 port = 5432
-name = "admin"
-user = "harvester"
+name = "toolsdb"
+user = "toolsadmin"
 password = "yoursecretsecret"
 
 [github]
@@ -16,4 +16,7 @@ api_url = "https://api.archives-ouvertes.fr/oai/hal/?verb=ListRecords&metadataPr
 
 [zenodo]
 record_api = "https://zenodo.org/api/records"
+
+[biobb]
+workflows_url = "https://mmb.irbbarcelona.org/biobb/workflows"
 

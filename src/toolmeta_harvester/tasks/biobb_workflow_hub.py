@@ -72,7 +72,7 @@ def iter_workflows(workflows_url=None):
             workflow_info = ga_workflow.parse_workflow(ga_workflow_json)
 
             attrs = wf_json.get("data", {}).get("attributes", {})
-            tags = attrs.get("tags") or []
+            tags = list(attrs.get("tags") or [])
             if "biobb" not in tags:
                 tags.append("biobb")
             if "jupyter" not in tags:
